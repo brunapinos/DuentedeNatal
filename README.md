@@ -1,2 +1,2 @@
-# GitHubIssues
-Telegram Bot for creates issues in GitHub
+# Duente de Natal
+Telegram Bot para sorteios de amigo oculto
