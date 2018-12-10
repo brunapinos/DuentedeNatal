@@ -22,6 +22,7 @@ main_text = []
 sent1 = {}
 owner = ""
 
+
 class VoteCounter(telepot.aio.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
         super(VoteCounter, self).__init__(*args, **kwargs)
@@ -40,6 +41,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         content_type, chat_type, chat_id = glance(msg)
         
         global owner
+
 
         if content_type != 'text':
             print('Not a text message.')
@@ -60,8 +62,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         else:
             print('Not a command')
             return
-
-            
+        
     def _draw(self):
 
         copy = draw.copy()
@@ -185,7 +186,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         pprint(votes)
 
 
-TOKEN = '678582209:AAGdYnxxV3SkRKzWm8BBR8ur4ozAcozzxQo'
+TOKEN = ''
 
 bot = telepot.aio.DelegatorBot(TOKEN, [
     include_callback_query_chat_id(
