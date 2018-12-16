@@ -46,9 +46,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             return
 
         if msg['text'] == '/comesa':
-            print(msg)
             owner = msg["from"]["id"]
-            print(owner)
             await self._init_ballot()
 
         elif msg['text'] == '/sortia' and msg["from"]["id"] == owner:
@@ -72,11 +70,13 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             chosen = random.choice(copy)
             while chosen == user:
                 chosen = random.choice(copy)
-            
+            text = ["vose tirou ", chosen["first_name"], chosen["last_name"]]
+            if chosen["username"] != "":
+                text.append(" (@" + chosen["username"] + ")")
             data = requests.get(
                 'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}'
                 .format(TOKEN, user["id"]
-                    , "vose tirou " + chosen["first_name"] + " " + chosen["last_name"] + " (@" + chosen["username"] + ")")
+                    , "".join(text))
             ).json()
 
             copy.remove(chosen)
@@ -85,9 +85,10 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
 
     async def _init_ballot(self):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                       InlineKeyboardButton(text='partisipa', switch_inline_query='t.me/duente_de_natal_bot', callback_data='yes'),
+                       InlineKeyboardButton(text='partisipa', callback_data='yes'),
                    ]])
         sent = await self.sender.sendMessage("vamo partisipa do sorteio", reply_markup=keyboard)
+        print(sent)
         self._member_count = await self.administrator.getChatMembersCount() - 1  # exclude myself, the bot
 
         self._ballot_box = {}
@@ -104,54 +105,69 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         self._ballot_box = None
         self._keyboard_msg_ident = None
         self._editor = None
+        draw = []
+        main_text = []
+        sent1 = {}
+        owner = ""
 
     async def on_callback_query(self, msg):
         query_id, from_id, query_data = glance(msg, flavor='callback_query')
-
         global sent1
 
         if from_id in self._ballot_box:
             await self.bot.answerCallbackQuery(query_id, text='vose ja voto animau')
         else:
-            try:
+            i = False
+            while i == False:
+                # await self.bot.answerCallbackQuery(query_id, url='t.me/duente_de_natal_bot?start=XXXX')
                 data = requests.get(
                     'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}'
                     .format(TOKEN, from_id, "hm vose ta participano")
                 ).json()
-                # print(data)
-            except Exception as exception:
-                print(data)
+    
+                if data["ok"] == False: 
+                    await self.bot.answerCallbackQuery(query_id, url='t.me/duente_de_natal_bot?start=XXXX')
+                    print(data)
+                    i = False
+                else:
+                    i = True
 
+            if i: 
+                user = {}
 
-            user = {}
+                user["username"] = ""
+                user["first_name"] = ""
+                user["last_name"] = ""
+                user["id"] = None
 
-            user["username"] = ""
-            user["first_name"] = ""
-            user["last_name"] = ""
-            user["id"] = None
+                try:
+                    user["username"] = data["result"]["chat"]["username"]
+                    user["last_name"] = data["result"]["chat"]["last_name"]
+                except Exception as exception:
+                    print(data)
 
-            try:
-                user["username"] = data["result"]["chat"]["username"]
                 user["first_name"] = data["result"]["chat"]["first_name"]
-                user["last_name"] = data["result"]["chat"]["last_name"]
-            except Exception as exception:
-                print(data)
+                user["id"] = from_id
+                copy = ""
 
-            user["id"] = from_id
-            copy = ""
+                if not draw:
+                    if user["username"] != "":
+                        main_text.append("pesoas:\n" + "- @" +user["username"] + "\n")
+                    else:
+                        main_text.append("pesoas:\n" +user["first_name"] + user["last_name"]+ "\n")
+                    sent1 = await self.sender.sendMessage("".join(main_text))
+                else:
+                    if user["username"] != "":
+                        main_text.append("- @" + user["username"] + "\n")
+                    else:
+                        main_text.append("- " +user["first_name"] + user["last_name"]+ "\n")
+                    identifier = telepot.message_identifier(sent1)
+                    await self.bot.editMessageText(identifier,"".join(main_text))
 
-            if not draw:
-                main_text.append("pesoas:\n" + "- @" +user["username"] + "\n")
-                sent1 = await self.sender.sendMessage("".join(main_text))
-            if draw:
-                main_text.append("- @" + user["username"] + "\n")
-                identifier = telepot.message_identifier(sent1)
-                await self.bot.editMessageText(identifier,"".join(main_text))
+                draw.append(user)
 
-            draw.append(user)
-
-            await self.bot.answerCallbackQuery(query_id, text='Ok')
-            self._ballot_box[from_id] = query_data
+                await self.bot.answerCallbackQuery(query_id, text='Ok')
+                self._ballot_box[from_id] = query_data
 
 
     def on_close(self, ex):
