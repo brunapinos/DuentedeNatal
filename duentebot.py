@@ -85,9 +85,9 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
 
     async def _init_ballot(self):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                       InlineKeyboardButton(text='partisipa', callback_data='yes'),
+                       InlineKeyboardButton(text='partisipa', switch_inline_query='t.me/duente_de_natal_bot', callback_data='yes'),
                    ]])
-        sent = await self.sender.sendMessage("vamo partisipa do sorteio\nquando cricar em partisipar, de um \start no privado", reply_markup=keyboard)
+        sent = await self.sender.sendMessage("vamo partisipa do sorteio", reply_markup=keyboard)
         self._member_count = await self.administrator.getChatMembersCount() - 1  # exclude myself, the bot
 
         self._ballot_box = {}
