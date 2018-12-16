@@ -18,6 +18,8 @@ import random
 
 votes = dict()
 draw = []
+# main_text = []
+# sent1 = None
 
 class VoteCounter(telepot.aio.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
@@ -41,10 +43,10 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             print('Not a text message.')
             return
 
-        if msg['text'] == '/start':
+        if msg['text'] == '/comesa':
             await self._init_ballot()
 
-        elif msg['text'] == '/startdraw':
+        elif msg['text'] == '/sortia':
             result = self._draw()
             await self._close_ballot()
             await self.sender.sendMessage('O sorteio foi realizado!')
@@ -66,7 +68,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             data = requests.get(
                 'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}'
                 .format(TOKEN, user["id"]
-                    , "Você tirou " + chosen["first_name"] + " " + chosen["last_name"] + " (@" + chosen["username"] + ")")
+                    , "vose tirou " + chosen["first_name"] + " " + chosen["last_name"] + " (@" + chosen["username"] + ")")
             ).json()
 
             copy.remove(chosen)
@@ -75,10 +77,9 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
 
     async def _init_ballot(self):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                       InlineKeyboardButton(text='Yes', callback_data='yes'),
+                       InlineKeyboardButton(text='partisipa', callback_data='yes'),
                    ]])
-        sent = await self.sender.sendMessage("Let's Vote ...", reply_markup=keyboard)
-
+        sent = await self.sender.sendMessage("vamo partisipa do sorteio", reply_markup=keyboard)
         self._member_count = await self.administrator.getChatMembersCount() - 1  # exclude myself, the bot
 
         self._ballot_box = {}
@@ -100,11 +101,11 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         query_id, from_id, query_data = glance(msg, flavor='callback_query')
 
         if from_id in self._ballot_box:
-            await self.bot.answerCallbackQuery(query_id, text='You have already voted %s' % self._ballot_box[from_id])
+            await self.bot.answerCallbackQuery(query_id, text='vose ja voto animau')
         else:
             data = requests.get(
                 'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}'
-                .format(TOKEN, from_id, "Agora você está participando")
+                .format(TOKEN, from_id, "hm vose ta participano")
             ).json()
 
             user = {}
@@ -122,8 +123,20 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
                 print(exception)
 
             user["id"] = from_id
+            # copy = ""
+
+            # if not draw:
+            #     main_text.append("pesoas:\n" + "@" +user["username"] + " ")
+            #     sent1 = await self.sender.sendMessage("".join(main_text))
+            #     print(sent1)
+            # if draw:
+            #     main_text.append("@" + user["username"] + " ")
+            #     edited = bot.editMessageText(telepot.message_identifier(sent1),"".join(main_text))
+            #     sent1 = edited
+
+            # print(main_text)
             draw.append(user)
-            
+
             await self.bot.answerCallbackQuery(query_id, text='Ok')
             self._ballot_box[from_id] = query_data
 
