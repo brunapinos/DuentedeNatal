@@ -15,6 +15,7 @@ from telepot.aio.delegate import (
 import requests
 import json
 import random
+import heroku.app # comment this line to run the bot locally
 
 votes = dict()
 draw = []
@@ -40,6 +41,7 @@ class DuenteBot(telepot.aio.helper.ChatHandler):
         
         global owner
 
+
         if content_type != 'text':
             print('Not a text message.')
             return
@@ -59,8 +61,7 @@ class DuenteBot(telepot.aio.helper.ChatHandler):
         else:
             print('Not a command')
             return
-
-            
+        
     def _draw(self):
 
         copy = draw.copy()
@@ -183,7 +184,7 @@ class DuenteBot(telepot.aio.helper.ChatHandler):
         pprint(votes)
 
 
-TOKEN = '678582209:AAGdYnxxV3SkRKzWm8BBR8ur4ozAcozzxQo'
+TOKEN = heroku.app.TOKEN # replace heroku.app.TOKEN with your bot token ro run locally
 
 bot = telepot.aio.DelegatorBot(TOKEN, [
     include_callback_query_chat_id(
