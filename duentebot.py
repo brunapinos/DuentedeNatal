@@ -23,20 +23,18 @@ main_text = []
 sent1 = {}
 owner = ""
 
-
-class VoteCounter(telepot.aio.helper.ChatHandler):
+class DuenteBot(telepot.aio.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
-        super(VoteCounter, self).__init__(*args, **kwargs)
+        super(DuenteBot, self).__init__(*args, **kwargs)
         global votes
         if self.id in votes:
-            self._ballot_box, self._keyboard_msg_ident, self._expired_event, self._member_count = votes[self.id]
+            self._ballot_box, self._keyboard_msg_ident, self._expired_event = votes[self.id]
             self._editor = telepot.aio.helper.Editor(self.bot, self._keyboard_msg_ident) if self._keyboard_msg_ident else None
         else:
             self._ballot_box = None
             self._keyboard_msg_ident = None
             self._editor = None
             self._expired_event = None
-            self._member_count = None
 
     async def on_chat_message(self, msg):
         content_type, chat_type, chat_id = glance(msg)
@@ -72,7 +70,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             chosen = random.choice(copy)
             while chosen == user:
                 chosen = random.choice(copy)
-            text = ["vose tirou ", chosen["first_name"], chosen["last_name"]]
+            text = ["vose tirou ", chosen["first_name"]," ", chosen["last_name"]]
             if chosen["username"] != "":
                 text.append(" (@" + chosen["username"] + ")")
             data = requests.get(
@@ -91,7 +89,6 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
                    ]])
         sent = await self.sender.sendMessage("vamo partisipa do sorteio", reply_markup=keyboard)
         print(sent)
-        self._member_count = await self.administrator.getChatMembersCount() - 1  # exclude myself, the bot
 
         self._ballot_box = {}
         self._keyboard_msg_ident = message_identifier(sent)
@@ -180,7 +177,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
             except KeyError:
                 pass
         else:
-            votes[self.id] = (self._ballot_box, self._keyboard_msg_ident, self._expired_event, self._member_count)
+            votes[self.id] = (self._ballot_box, self._keyboard_msg_ident, self._expired_event)
 
         from pprint import pprint
         print('%d closing ...' % self.id)
@@ -192,7 +189,7 @@ TOKEN = heroku.app.TOKEN # replace heroku.app.TOKEN with your bot token ro run l
 bot = telepot.aio.DelegatorBot(TOKEN, [
     include_callback_query_chat_id(
         pave_event_space())(
-            per_chat_id(types=['group']), create_open, VoteCounter, timeout=10),
+            per_chat_id(types=['group', 'supergroup']), create_open, DuenteBot, timeout=10),
 ])
 
 loop = asyncio.get_event_loop()
