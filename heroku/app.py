@@ -8,7 +8,7 @@ except ImportError:
 app = Flask(__name__)
 TOKEN = os.environ['PP_BOT_TOKEN']  # put your token in heroku app as environment variable
 SECRET = '/bot' + TOKEN
-URL = '' #  paste the url of your application
+#URL = '' #  paste the url of your application
 UPDATE_QUEUE = Queue()
 BOT = telepot.Bot(TOKEN)
 def on_chat_message(msg):
@@ -21,4 +21,4 @@ def pass_update():
    return 'OK'
 BOT.setWebhook() # unset if was set previously
 
-BOT.setWebhook(URL + SECRET)
+##BOT.setWebhook(URL + SECRET)
