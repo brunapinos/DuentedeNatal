@@ -15,7 +15,7 @@ from telepot.aio.delegate import (
 import requests
 import json
 import random
-import heroku.app
+import heroku.app # comment this line to run the bot locally
 
 votes = dict()
 draw = []
@@ -187,7 +187,7 @@ class VoteCounter(telepot.aio.helper.ChatHandler):
         pprint(votes)
 
 
-TOKEN = heroku.app.TOKEN
+TOKEN = heroku.app.TOKEN # replace heroku.app.TOKEN with your bot token ro run locally
 
 bot = telepot.aio.DelegatorBot(TOKEN, [
     include_callback_query_chat_id(
